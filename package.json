@@ -1,0 +1,36 @@
+{
+  "name": "@gsandf/wordpress-graphql-schema",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "./src/commonjs-entry.js",
+  "module": "./src/index.js",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "create-root-schema": "^2.0.0",
+    "date-fns": "^2.8.0",
+    "graphql": "^14.6.0",
+    "graphql-tools": "^4.0.7",
+    "path-to-regexp": "^6.1.0",
+    "sift": "^8.5.1",
+    "unchanged": "^2.2.1"
+  },
+  "devDependencies": {
+    "amper-scripts": "^1.0.0-0",
+    "ava": "^3.5.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "esm": "^3.2.25",
+    "npm-run-all": "^4.1.5"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "scripts": {
+    "format-check": "amper-scripts format-check",
+    "format": "amper-scripts format-write",
+    "lint": "amper-scripts lint --config .eslintrc.js src",
+    "test": "ava",
+    "validate": "run-p lint format-check"
+  }
+}
