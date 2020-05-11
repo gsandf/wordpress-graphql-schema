@@ -29,8 +29,7 @@ const wordPressOptions = {
   baseURL: 'https://example.com/wp-json'
 };
 
-const wordPressSchema = createSchema(wordPressOptions);
-const server = new GraphQLServer({ ...wordPressSchema });
+const server = new GraphQLServer({ schema: createSchema(wordPressOptions) });
 
 server.start(graphqlOptions, ({ playground, port }) => {
   console.log(` > Site @ http://localhost:${port}/`);
@@ -61,13 +60,69 @@ Default: `'localhost:8080/wp-json'`
 Type: `object`<br />
 Default: `{ 'Content-Type': 'application/json' }`
 
+### `createUncompiledSchema(options)`
+
+Same as `createSchema`, but returns an object with `typeDefs`, `resolvers`, and
+`schemaDefinitions` instead of a schema AST. This can be useful if you need to
+tweak parts of the schema before using it.
+
+#### `options`
+
+Type: `object`
+
+Options are passed to axios. For details, see the [axios
+docs](https://github.com/axios/axios#request-config).
+
+Options with defaults already set are listed below:
+
+#### `options.baseURL`
+
+Type: `string`<br />
+Default: `'localhost:8080/wp-json'`
+
+#### `options.headers`
+
+Type: `object`<br />
+Default: `{ 'Content-Type': 'application/json' }`
+
+### `wpFetch(path, options)`
+
+Create a network request to the WordPress API.
+
+#### `path`
+
+Type: `string`
+
+The endpoint to call.
+
+#### `options`
+
+Type: `object`
+
+Options are passed to axios. For details, see the [axios
+docs](https://github.com/axios/axios#request-config).
+
+#### `options.urlParams`
+
+Used to pre-compile request paths. For example:
+
+````js
+const options = {
+  urlParams: { id: 3 }
+};
+
+wpFetch('/example/:id', options);
+```
+
+...will create a network request to `{{baseURL}}/example/3`.
+
 ## Install
 
 Using [Yarn]:
 
 ```bash
 $ yarn add @gsandf/wordpress-graphql-schema
-```
+````
 
 …or using [npm]:
 
