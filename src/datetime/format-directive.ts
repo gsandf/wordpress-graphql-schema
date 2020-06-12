@@ -39,7 +39,7 @@ class FormattableDateDirective extends SchemaDirectiveVisitor {
       context,
       info
     ) {
-      const value = await (field.resolve ?? defaultFieldResolver).call(
+      const value = await defaultFieldResolver.call(
         this,
         source,
         otherArgs,
