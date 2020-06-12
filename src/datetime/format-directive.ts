@@ -1,5 +1,10 @@
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { GraphQLBoolean, GraphQLString, GraphQLField } from 'graphql';
+import {
+  defaultFieldResolver,
+  GraphQLBoolean,
+  GraphQLField,
+  GraphQLString
+} from 'graphql';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
 import { serialize } from './parser';
 
@@ -28,13 +33,19 @@ class FormattableDateDirective extends SchemaDirectiveVisitor {
       type: GraphQLBoolean
     });
 
-    field.resolve = async function resolve(
+    field.resolve = async function _resolve(
       source,
       { format, formatRelative, ...otherArgs },
       context,
       info
     ) {
-      const value = await resolve.call(this, source, otherArgs, context, info);
+      const value = await (field.resolve ?? defaultFieldResolver).call(
+        this,
+        source,
+        otherArgs,
+        context,
+        info
+      );
 
       const date = serialize(value);
 
