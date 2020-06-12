@@ -1,18 +1,18 @@
-import axios from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { compile } from 'path-to-regexp';
 
-export let request;
+export let request: AxiosInstance;
 
 const defaultOptions = {
   baseURL: 'localhost:8080/wp-json',
   headers: { 'Content-Type': 'application/json' }
 };
 
-export const setRequestOptions = options => {
+export const setRequestOptions = (options: AxiosRequestConfig): void => {
   request = axios.create({ ...defaultOptions, ...options });
 };
 
-function formatPost(post) {
+function formatPost(post: any): any {
   return {
     ...post,
     ...post.acf,
@@ -23,10 +23,9 @@ function formatPost(post) {
   };
 }
 
-/**
- * @typedef {{ urlParams? }} ExtraOptions
- * @typedef {import('axios').AxiosRequestConfig & ExtraOptions} WPFetchOptions
- */
+export interface WPFetchOptions extends AxiosRequestConfig {
+  urlParams?: Record<string, any>;
+}
 
 /**
  * Fetch data from the WordPress API
@@ -35,7 +34,10 @@ function formatPost(post) {
  * @return {Promise<object|object[]>} the response from the WordPress API
  * @see https://github.com/axios/axios for more options
  */
-export async function wpFetch(path, { urlParams, ...options } = {}) {
+export async function wpFetch<T extends any | any[]>(
+  path: string,
+  { urlParams, ...options }: WPFetchOptions = {}
+): Promise<T> {
   const compiledPath = urlParams ? compile(path)(urlParams) : path;
 
   try {

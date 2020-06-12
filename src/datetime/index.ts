@@ -1,11 +1,12 @@
-import { GraphQLScalarType } from 'graphql';
+import { GraphQLScalarType, IntValueNode, StringValueNode } from 'graphql';
 import { FormattableDateDirective } from './format-directive';
 import { coerceToDate, serialize } from './parser';
 
 export const DateTimeType = new GraphQLScalarType({
   description: 'Date time type',
   name: 'DateTime',
-  parseLiteral: ({ value }) => coerceToDate(value),
+  parseLiteral: ({ kind, value }: IntValueNode | StringValueNode) =>
+    coerceToDate(kind === 'StringValue' ? value : parseInt(value)),
   parseValue: coerceToDate,
   serialize
 });

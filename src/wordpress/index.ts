@@ -1,6 +1,13 @@
-import { get } from 'unchanged';
+import { get } from '@blakek/deep';
 import { wpFetch } from '../api';
 import { filterArray } from '../utils';
+import * as WP from '../wordpress-graphql-schema';
+
+interface PostInputArguments {
+  id?: number | string;
+  preview?: boolean;
+  slug?: string;
+}
 
 export const postFields = /* GraphQL */ `
   dateCreated: DateTime! @formatDate
@@ -28,29 +35,34 @@ export const postFilterFields = /* GraphQL */ `
 
 export const resolvers = {
   Media: {
-    altText: parent => parent.alt_text,
-    sizes: parent => parent.media_details.sizes
+    altText: (parent: WP.UnformattedMedia): string => parent.alt_text,
+    sizes: (parent: WP.UnformattedMedia): WP.UnformattedMediaSizes =>
+      parent.media_details.sizes
   },
   MediaSize: {
-    url: parent => parent.source_url
+    url: (parent: WP.UnformattedMediaSize): string => parent.source_url
   },
   Page: {
-    content: parent => parent.content.rendered,
-    excerpt: parent => parent.excerpt.rendered,
-    featuredMedia: ({ featured_media: featuredMedia }) => {
-      if (!featuredMedia) return null;
-      return wpFetch('/wp/v2/media/:id', {
-        urlParams: { id: featuredMedia }
+    content: (parent: WP.UnformattedPost): string => parent.content.rendered,
+    excerpt: (parent: WP.UnformattedPost): string => parent.excerpt.rendered,
+    featuredMedia: (
+      parent: WP.UnformattedPost
+    ): Promise<WP.UnformattedMedia> => {
+      if (!parent.featured_media) return null;
+      return wpFetch<WP.UnformattedMedia>('/wp/v2/media/:id', {
+        urlParams: { id: parent.featured_media }
       });
     }
   },
   Post: {
-    content: parent => parent.content.rendered,
-    excerpt: parent => parent.excerpt.rendered,
-    featuredMedia: ({ featured_media: featuredMedia }) => {
-      if (!featuredMedia) return null;
-      return wpFetch('/wp/v2/media/:id', {
-        urlParams: { id: featuredMedia }
+    content: (parent: WP.UnformattedPost): string => parent.content.rendered,
+    excerpt: (parent: WP.UnformattedPost): string => parent.excerpt.rendered,
+    featuredMedia: (
+      parent: WP.UnformattedPost
+    ): Promise<WP.UnformattedMedia> => {
+      if (!parent.featured_media) return null;
+      return wpFetch<WP.UnformattedMedia>('/wp/v2/media/:id', {
+        urlParams: { id: parent.featured_media }
       });
     }
   },
@@ -71,48 +83,68 @@ export const resolvers = {
     TRASH: 'trash'
   },
   Query: {
-    allPage: (_, { filter }) =>
-      wpFetch('/wp/v2/pages').then(data => filterArray(data, filter)),
-    allPost: (_, { filter }) =>
-      wpFetch('/wp/v2/posts').then(data => filterArray(data, filter)),
-    page: async (_, { id, preview, slug }) => {
+    allPage: (
+      _: unknown,
+      { filter }: { filter: WP.PostFilterFields }
+    ): Promise<WP.PostFields[]> =>
+      wpFetch<WP.PostFields[]>('/wp/v2/pages').then(data =>
+        filterArray(data, filter)
+      ),
+    allPost: (
+      _: unknown,
+      { filter }: { filter: WP.PostFilterFields }
+    ): Promise<WP.PostFields[]> =>
+      wpFetch<WP.PostFields[]>('/wp/v2/posts').then(data =>
+        filterArray(data, filter)
+      ),
+    page: async (
+      _: unknown,
+      { id, preview, slug }: PostInputArguments
+    ): Promise<any> => {
       if (!id) {
         if (!slug) {
           throw new Error('either `id` or `slug` is required');
         }
 
-        id = await wpFetch('/wp/v2/pages', { query: { slug } }).then(pages =>
-          get('0.id', pages)
-        );
+        id = await wpFetch('/wp/v2/pages', {
+          params: { slug }
+        }).then(pages => get(pages, '0.id'));
       }
 
-      const pageData = await wpFetch('/wp/v2/pages/:id', { urlParams: { id } });
+      const pageData = await wpFetch('/wp/v2/pages/:id', {
+        urlParams: { id }
+      });
 
       if (preview) {
-        return wpFetch(get('_links.version-history.0.href', pageData)).then(
-          results => results[0]
-        );
+        return wpFetch<any[]>(
+          get(pageData, '_links.version-history.0.href')
+        ).then(results => results[0]);
       }
 
       return pageData;
     },
-    post: async (_, { id, preview, slug }) => {
+    post: async (
+      _: unknown,
+      { id, preview, slug }: PostInputArguments
+    ): Promise<any> => {
       if (!id) {
         if (!slug) {
           throw new Error('either `id` or `slug` is required');
         }
 
-        id = await wpFetch('/wp/v2/posts', { query: { slug } }).then(posts =>
-          get('0.id', posts)
-        );
+        id = await wpFetch('/wp/v2/posts', {
+          params: { slug }
+        }).then(posts => get(posts, '0.id'));
       }
 
-      const postData = await wpFetch('/wp/v2/posts/:id', { urlParams: { id } });
+      const postData = await wpFetch('/wp/v2/posts/:id', {
+        urlParams: { id }
+      });
 
       if (preview) {
-        return wpFetch(get('_links.version-history.0.href', postData)).then(
-          results => results[0]
-        );
+        return wpFetch<any[]>(
+          get(postData, '_links.version-history.0.href')
+        ).then(results => results[0]);
       }
 
       return postData;

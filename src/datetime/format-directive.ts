@@ -1,26 +1,34 @@
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { defaultFieldResolver, GraphQLBoolean, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLString, GraphQLField } from 'graphql';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
 import { serialize } from './parser';
 
-const formatDate = (date, formatString) => format(parseISO(date), formatString);
+const formatDate = (date: string, formatString: string) =>
+  format(parseISO(date), formatString);
 
 class FormattableDateDirective extends SchemaDirectiveVisitor {
-  visitFieldDefinition(field) {
-    const { resolve = defaultFieldResolver } = field;
+  visitFieldDefinition(field: GraphQLField<any, any>): void {
     const { defaultFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx" } = this.args;
 
     field.args.push({
+      astNode: undefined,
+      defaultValue: undefined,
+      description: 'Format a date using the given format string',
+      extensions: undefined,
       name: 'format',
       type: GraphQLString
     });
 
     field.args.push({
+      astNode: undefined,
+      defaultValue: undefined,
+      description: 'Format a date as relative to now (e.g. "5 minutes ago")',
+      extensions: undefined,
       name: 'formatRelative',
       type: GraphQLBoolean
     });
 
-    field.resolve = async function(
+    field.resolve = async function resolve(
       source,
       { format, formatRelative, ...otherArgs },
       context,

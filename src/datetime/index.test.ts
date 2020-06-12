@@ -44,7 +44,7 @@ test('parseValue deserializes date strings to date', t => {
 });
 
 test('parseLiteral deserializes timestamp number to date', t => {
-  const ast = { kind: Kind.INT, value: 1574363683121 };
+  const ast = { kind: Kind.INT, value: '1574363683121' };
   t.deepEqual(
     DateTimeType.parseLiteral(ast, null),
     new Date('2019-11-21T19:14:43.121Z')
@@ -59,8 +59,15 @@ test('parseValue deserializes timestamp number to date', t => {
 });
 
 test('throws when deserializing an invalid date', t => {
-  t.throws(() => DateTimeType.parseLiteral('laksdjf', null), {
-    instanceOf: TypeError
-  });
+  t.throws(
+    () =>
+      DateTimeType.parseLiteral(
+        { value: 'laksdjf', kind: 'StringValue' },
+        null
+      ),
+    {
+      instanceOf: TypeError
+    }
+  );
   t.throws(() => DateTimeType.parseValue('laksdjf'), { instanceOf: TypeError });
 });

@@ -1,6 +1,6 @@
 import sift from 'sift';
 
-export function isPlainObject(obj) {
+export function isPlainObject(obj: unknown): boolean {
   return (
     typeof obj === 'object' &&
     obj !== null &&
@@ -9,12 +9,12 @@ export function isPlainObject(obj) {
   );
 }
 
-export function filterArray(array, filters = {}) {
+export function filterArray<T>(array: T[], filters = {}): T[] {
   return array.filter(sift(siftifyArguments(filters)));
 }
 
-export function siftifyArguments(args, level = 0) {
-  const newArgs = {};
+export function siftifyArguments(args: Record<string, any>, level = 0): any {
+  const newArgs: Record<string, any> = {};
 
   Object.entries(args).forEach(([key, value]) => {
     if (isPlainObject(value)) {

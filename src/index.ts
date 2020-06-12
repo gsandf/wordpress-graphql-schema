@@ -1,18 +1,20 @@
 import {
   combineSchemaDefinitions,
-  makeExecutableSchema
+  makeExecutableSchema,
+  SchemaDefinition
 } from 'create-root-schema';
-import { setRequestOptions, wpFetch } from './api.js';
-import * as dateTimeType from './datetime/index.js';
-import * as filterableTypes from './filterable-types.js';
-import * as wordpress from './wordpress/index.js';
+import { GraphQLSchema } from 'graphql';
+import { setRequestOptions, wpFetch } from './api';
+import * as dateTimeType from './datetime';
+import * as filterableTypes from './filterable-types';
+import * as wordpress from './wordpress';
 
-function createUncompiledSchema(options = {}) {
+function createUncompiledSchema(options = {}): SchemaDefinition {
   setRequestOptions(options);
   return combineSchemaDefinitions([dateTimeType, filterableTypes, wordpress]);
 }
 
-function createSchema(options = {}) {
+function createSchema(options = {}): GraphQLSchema {
   setRequestOptions(options);
   return makeExecutableSchema([dateTimeType, filterableTypes, wordpress]);
 }
