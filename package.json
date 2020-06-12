@@ -1,6 +1,6 @@
 {
   "name": "@gsandf/wordpress-graphql-schema",
-  "version": "0.3.0-0",
+  "version": "0.3.0",
   "license": "MIT",
   "main": "./dist/wordpress-graphql-schema.cjs.js",
   "module": "./dist/wordpress-graphql-schema.esm.js",
